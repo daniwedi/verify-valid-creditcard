@@ -1,0 +1,37 @@
+#%RAML 1.0
+baseUri: http://localhost:8081/
+title: Customer management api
+
+types:
+  TestSchema: !include schemas/request_schema.json
+
+/validateCard:
+  post:
+    body:
+      application/json:
+        type: TestSchema
+        example: !include examples/resquest.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/success_response.json
+      400:
+        body:
+          application/json:
+            example: !include Errors/post.bad_request.json
+      404:
+        body:
+          application/json:
+            example: !include Errors/resource_not_found.json
+              
+            
+      
+            
+  
+     
+        
+    
+
+
+

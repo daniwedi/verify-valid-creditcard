@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd">
+	<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="6cfb9f2c-23a9-4694-9cbe-cb08caf81864" />
+	<flow name="process.apiFlow" doc:id="1d6baa69-1d60-4681-998a-503c022b7e7f" >
+		<ee:transform doc:name="Transform Message" doc:id="7dc42fbf-edfa-4d29-939f-9b8d40daa31c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<try doc:name="Try" doc:id="dfe406e9-4391-48ab-be8c-fa6bdebb8ec5" >
+			<validation:validate-size doc:name="Validate size" doc:id="2bf701f9-ae99-4650-bb0e-e0b280a8e46c" config-ref="Validation_Config" value="#[payload.CardNo]" min="16" max="16" message=" The Card Number should be 16"/>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7f296e0d-95c5-4da7-a437-0506f749d42d" type="VALIDATION:INVALID_SIZE">
+					<ee:transform doc:name="Transform Message" doc:id="468999f3-b89e-44a0-b51c-e2b487849770" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"Message":"Invalid card Size"
+}]]></ee:set-payload>
+						</ee:message>
+						<ee:variables >
+							<ee:set-variable variableName="http.Status" ><![CDATA[500]]></ee:set-variable>
+						</ee:variables>
+					</ee:transform>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<logger level="INFO" doc:name="Logger" doc:id="f3a7bde6-f42b-4d0b-b65b-26b199ef3e06" message="valid credit card Number Size" />
+		<set-variable value="#[payload]" doc:name="orginalPayload" doc:id="1b6fdc0f-63cf-4df6-a5d8-5cd81c3481c7" variableName="orginalPayload"/>
+		<java:invoke-static method="ValidateCreditCardNumber(java.lang.String)" doc:name="Invoke static" doc:id="62bc3550-ff2f-42d7-9996-9e242e579776" class="card.ValidateCreditCard">
+			<java:args ><![CDATA[#[arg0:payload.CardNo]]]></java:args>
+		</java:invoke-static>
+		<set-payload value='#[%dw 2.0
+output application/json
+---
+if(payload)
+
+{
+	"FirstName":vars.orginalPayload.FirstName,
+	"LastName":vars.orginalPayload.LastName,
+	"CardNo":vars.orginalPayload.CardNo,
+	"BirthDate":vars.orginalPayload.BirthDate,
+	"CardExpireDate":vars.orginalPayload.CardExpireDate,
+	 "message": "Valid Card Number Verified, found correct"
+	
+	}
+
+
+else
+
+	
+{
+	"message": "Fake Card Number Verified, found incorect card"
+}]' doc:name="Set Payload" doc:id="69d491ea-97bf-439d-8c4b-03eecf85a644" />
+	</flow>
+</mule>

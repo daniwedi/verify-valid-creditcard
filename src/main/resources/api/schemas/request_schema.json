@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+     
+    "FirstName": {"type": "string"},
+    "MiddleName": {"type": "string"},
+    "LastName": {"type": "string"},
+    "CardNo":{"type": "string"},
+    "CardExpireDate":{"type": "string"},
+    "BirthDate": {"type": "string"},
+    "BillingStreet": {"type": "string"},
+    "BillingCit": {"type": "string"},
+    "BillingState": {"type": "string"},
+    "BillingPostalCode": {"type": "string"},
+    "BillingCountry": {"type": "string"}
+  
+ },
+  "required": ["FirstName","LastName","BirthDate","CardNo","CardExpireDate"]
+}
